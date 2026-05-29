@@ -209,11 +209,6 @@ def render_frame(f: int) -> Image.Image:
     cw = bbox[2] - bbox[0]
     cd.text(((RW - cw) / 2, RH - 42 * SS), cap, font=F_CAP, fill=(225, 220, 245))
 
-    # ---- seamless loop: fade back toward bare background at the very end ----
-    if p > 0.9:
-        a = (p - 0.9) / 0.1
-        frame = Image.blend(frame, BG, smooth(a))
-
     return frame.resize((W, H), Image.LANCZOS)
 
 
@@ -231,7 +226,10 @@ def main():
     if not ffmpeg:
         print("ffmpeg not found; frames written. Build the GIF manually.")
         return
-    vf = ("split[s0][s1];[s0]palettegen=max_colors=160:stats_mode=full[p];"
+    # Hold the fully-formed graph for 5s (tpad clones the last frame) so it can
+    # be read before the loop restarts.
+    vf = ("tpad=stop_mode=clone:stop_duration=5,"
+          "split[s0][s1];[s0]palettegen=max_colors=160:stats_mode=full[p];"
           "[s1][p]paletteuse=dither=sierra2_4a")
     subprocess.run([ffmpeg, "-y", "-framerate", str(FPS), "-i",
                     str(FRAMES / "frame_%04d.png"), "-vf", vf,

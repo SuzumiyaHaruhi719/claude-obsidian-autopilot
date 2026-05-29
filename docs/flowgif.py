@@ -21,6 +21,7 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 SS = 2
+HOLD = 5  # seconds to hold the completed diagram before the loop restarts
 HERE = Path(__file__).resolve().parent
 
 BG_TOP = (10, 12, 22)
@@ -216,12 +217,13 @@ def render(name, spec):
             fd.text((22 * SS, 16 * SS), spec["title"], font=f_title, fill=(190, 150, 245))
         for lx, ly, txt, sz, col in spec.get("captions", []):
             fd.text((lx * RW, ly * RH), txt, font=_font(int(sz * SS), "segoeuib.ttf"), fill=col)
-        if p > 0.88:
-            frame = Image.blend(frame, bg, smooth((p - 0.88) / 0.12))
         frame.resize((W, H), Image.LANCZOS).save(frames_dir / f"f_{f:04d}.png")
 
     out = HERE / f"{name}.gif"
-    vf = ("split[s0][s1];[s0]palettegen=max_colors=128:stats_mode=full[p];"
+    # tpad clones the final (fully-built) frame for HOLD seconds so the complete
+    # diagram stays on screen long enough to read before the loop restarts.
+    vf = (f"tpad=stop_mode=clone:stop_duration={HOLD},"
+          "split[s0][s1];[s0]palettegen=max_colors=128:stats_mode=full[p];"
           "[s1][p]paletteuse=dither=sierra2_4a")
     subprocess.run(["ffmpeg", "-y", "-framerate", str(FPS), "-i",
                     str(frames_dir / "f_%04d.png"), "-vf", vf, "-loop", "0", str(out)],

@@ -1,7 +1,5 @@
-<h1 align="center">Claude Autopilot for Obsidian</h1>
-
 <p align="center">
-  <b>Turn your Obsidian vault into the single source of truth for your codebase — and keep it that way automatically.</b>
+  <img src="docs/hero.gif" alt="Claude Autopilot for Obsidian — your vault, kept as the single source of truth for your code, automatically" width="100%">
 </p>
 
 <p align="center">
@@ -12,15 +10,15 @@
   <img alt="Claude Code skill" src="https://img.shields.io/badge/Claude%20Code-skill-9b59f6">
 </p>
 
+Claude reads the right notes before it changes code, writes structured notes
+*as* it changes code, archives every conversation, cross-links related sessions,
+and git-syncs the vault. One pure-Python toolkit. **macOS · Linux · Windows.**
+
 <p align="center">
   <img src="docs/demo.gif" alt="Claude wiring up the Obsidian knowledge graph like neural synapses as it works" width="100%">
   <br>
   <sub><i>The vault's knowledge graph forming in real time — notes light up, wiki-links connect like synapses firing.</i></sub>
 </p>
-
-Claude reads the right notes before it changes code, writes structured notes
-*as* it changes code, archives every conversation, cross-links related sessions,
-and git-syncs the vault. One pure-Python toolkit. **macOS · Linux · Windows.**
 
 ---
 
@@ -259,8 +257,9 @@ claude-autopilot-for-obsidian/
 ├── commands/
 │   └── obsidian-init.md      # /obsidian-init slash command (auto-document a codebase)
 ├── docs/
-│   ├── make_demo.py          # renders the hero demo GIF
-│   └── flowgif.py            # renders the animated flow diagrams
+│   ├── make_hero.py          # renders the animated hero banner (hero.gif)
+│   ├── make_demo.py          # renders the knowledge-graph demo (demo.gif)
+│   └── flowgif.py            # renders the six animated flow diagrams
 └── obsidian_pilot/           # pure-stdlib package
     ├── util.py               # paths, logging, locking, atomic writes
     ├── config.py             # discovery, schema, defaults
