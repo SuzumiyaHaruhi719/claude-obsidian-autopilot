@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Obsidian Autopilot - single entry point for hooks and the CLI.
+"""Claude Autopilot for Obsidian - single entry point for hooks and the CLI.
 
 Usage (as a Claude Code hook, registered automatically by `install`):
     pilot.py session-start      # SessionStart  : pull vaults + rebuild index

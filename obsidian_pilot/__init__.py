@@ -1,4 +1,4 @@
-"""Obsidian Autopilot — cross-platform Claude Code ↔ Obsidian automation.
+"""Claude Autopilot for Obsidian — cross-platform Claude Code ↔ Obsidian automation.
 
 A single, config-driven, pure-stdlib Python package that replaces a pile of
 per-OS shell hooks. Works identically on macOS, Linux and Windows.

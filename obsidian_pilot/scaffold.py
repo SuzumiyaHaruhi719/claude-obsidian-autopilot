@@ -35,8 +35,8 @@ def _index(name: str) -> str:
     return f"""# {name} — Vault Index
 
 The canonical knowledge vault for **{name}**, kept in sync with the code by
-Obsidian Autopilot. This file is the map of the vault and the place to record
-the last working state.
+Claude Autopilot for Obsidian. This file is the map of the vault and the place
+to record the last working state.
 
 ## Vault map
 
@@ -65,8 +65,8 @@ the last working state.
 def _iron_rules(name: str) -> str:
     return f"""# Iron Rules — {name}
 
-Non-negotiable rules for this project. Obsidian Autopilot reads this file on
-entry and treats it as overriding its defaults. Add your own below.
+Non-negotiable rules for this project. Claude Autopilot for Obsidian reads this
+file on entry and treats it as overriding its defaults. Add your own below.
 
 ## Keep the vault true
 

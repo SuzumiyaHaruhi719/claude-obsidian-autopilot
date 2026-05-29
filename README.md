@@ -1,5 +1,7 @@
+<h1 align="center">Claude Autopilot for Obsidian</h1>
+
 <p align="center">
-  <img src="docs/hero.png" alt="Obsidian Autopilot" width="100%">
+  <b>Turn your Obsidian vault into the single source of truth for your codebase — and keep it that way automatically.</b>
 </p>
 
 <p align="center">
@@ -11,18 +13,14 @@
 </p>
 
 <p align="center">
-  <b>Turn your Obsidian vault into the single source of truth for your codebase — and keep it that way automatically.</b>
+  <img src="docs/demo.gif" alt="Claude wiring up the Obsidian knowledge graph like neural synapses as it works" width="100%">
+  <br>
+  <sub><i>The vault's knowledge graph forming in real time — notes light up, wiki-links connect like synapses firing.</i></sub>
 </p>
 
 Claude reads the right notes before it changes code, writes structured notes
 *as* it changes code, archives every conversation, cross-links related sessions,
 and git-syncs the vault. One pure-Python toolkit. **macOS · Linux · Windows.**
-
-<p align="center">
-  <img src="docs/demo.gif" alt="Claude wiring up the Obsidian knowledge graph like neural synapses as it works" width="88%">
-  <br>
-  <sub><i>The vault's knowledge graph forming in real time — notes light up, wiki-links connect like synapses firing.</i></sub>
-</p>
 
 ---
 
@@ -48,21 +46,11 @@ the moment code and notes drift apart. The cure is a discipline — *change the
 note in the same breath as the code* — plus plumbing that handles the
 mechanical parts (syncing, archiving, indexing) so you never think about them.
 
-Obsidian Autopilot is that discipline **encoded as a Claude skill** plus that
-plumbing **encoded as three lifecycle hooks**.
+Claude Autopilot for Obsidian is that discipline **encoded as a Claude skill**
+plus that plumbing **encoded as three lifecycle hooks** — two lanes that both
+keep the vault true:
 
-```mermaid
-flowchart TB
-    subgraph SEM["🧠 Semantic layer — Claude decides (SKILL.md)"]
-        direction LR
-        R["Read the right note<br/>before editing"] --> W["Write the note<br/>in the same turn"] --> C["Commit with a<br/>Vault-updated: trailer"]
-    end
-    subgraph AUTO["⚙️ Automatic layer — hooks run on their own"]
-        direction LR
-        P["pull on<br/>session start"] --> A["archive each<br/>conversation"] --> I["rebuild index +<br/>link sessions"] --> PU["push<br/>(opt-in)"]
-    end
-    SEM -.->|"both keep the vault true"| AUTO
-```
+<p align="center"><img src="docs/layers.gif" alt="Two layers — a semantic lane (read, write, commit) and an automatic lane (pull, archive, index, push) both feeding the vault" width="92%"></p>
 
 ---
 
@@ -72,7 +60,7 @@ This skill is a ground-up rewrite of a working-but-brittle setup. The redesign
 fixed concrete problems — worth listing, because they are the problems *any*
 home-grown version hits:
 
-| # | Problem in the old setup | Fix in Autopilot |
+| # | Problem in the old setup | Fix in this rewrite |
 |---|--------------------------|------------------|
 | 1 | **Windows-only.** Six `powershell.exe` scripts with GBK-encoding workarounds. | One pure-Python toolkit; runs identically on all three OSes. |
 | 2 | **Hardcoded paths.** A user's absolute path baked into every script. | Everything lives in one config file; nothing is hardcoded. |
@@ -92,34 +80,7 @@ Two layers, one vault.
 **Automatic layer** — three hooks registered in `~/.claude/settings.json`,
 each calling one dispatcher (`pilot.py <event>`):
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant CC as Claude Code
-    participant P as pilot.py
-    participant V as Vault (git)
-    participant H as Agent History
-
-    Note over CC,H: 🟢 SessionStart
-    CC->>P: session-start
-    P->>V: git pull --rebase --autostash
-    P->>H: rebuild _INDEX.md
-
-    Note over CC,H: 🔵 UserPromptSubmit (every message)
-    CC->>P: prompt { prompt, session_id, cwd }
-    alt prompt mentions vault / 笔记 / notes
-        P->>V: smart pull
-    end
-    P->>H: cross-link related sessions
-    P->>H: refresh index (throttled 30 min)
-
-    Note over CC,H: 🔴 Stop (session ends)
-    CC->>P: stop { transcript_path }
-    P->>H: render Markdown + raw JSONL (secrets redacted)
-    opt auto_push enabled
-        P->>V: scoped add, commit, pull, push
-    end
-```
+<p align="center"><img src="docs/lifecycle.gif" alt="Lifecycle hooks — session start pulls and indexes, each prompt smart-pulls and links, session end archives and optionally pushes" width="92%"></p>
 
 **Semantic layer** — `SKILL.md`. Claude loads it whenever your work touches a
 configured vault, and follows the read-before / write-with / commit-trailer
@@ -132,27 +93,7 @@ rules. This is the part that keeps the *content* honest; the hooks only keep the
 
 What actually happens across one unit of work:
 
-```mermaid
-flowchart TD
-    Start([You ask Claude to change something]) --> HasVault{Vault exists<br/>for this project?}
-    HasVault -- no --> Create["🌱 Create one<br/>python pilot.py init<br/>scaffolds &lt;project&gt;/obsidian"]
-    Create --> Read
-    HasVault -- yes --> Read{Note exists<br/>for this area?}
-    Read -- yes --> ReadIt["📖 Read the note first<br/>(entry points, known issues)"]
-    Read -- no --> Skip[Proceed]
-    ReadIt --> Edit["✏️ Edit the code"]
-    Skip --> Edit
-    Edit --> Map{Which note now<br/>describes something untrue?}
-    Map -->|feature| F["update 10-Features/slug.md"]
-    Map -->|module| M["update 20-Modules/slug.md"]
-    Map -->|bugfix| B["add 50-Audit/Findings + Log line"]
-    Map -->|arch/deps| Arch["update 01-Architecture.md"]
-    F --> Commit
-    M --> Commit
-    B --> Commit
-    Arch --> Commit
-    Commit["📝 Commit with<br/>Vault-updated: paths"] --> Stop([Session ends, hooks archive + sync])
-```
+<p align="center"><img src="docs/workflow.gif" alt="The workflow — if no vault exists, create one with init, then read the note, edit the code, write the note in the same turn, and commit with a Vault-updated trailer" width="94%"></p>
 
 > **The one rule:** a vault note and the code it documents change together, in
 > the same unit of work — never "edit now, fix the note later." If the note lags
@@ -166,30 +107,25 @@ flowchart TD
 
 ```bash
 # 1. Clone anywhere
-git clone https://github.com/SuzumiyaHaruhi719/claude-obsidian-autopilot.git
-cd /path/to/claude-obsidian-autopilot
+git clone https://github.com/SuzumiyaHaruhi719/claude-autopilot-for-obsidian.git
+cd /path/to/claude-autopilot-for-obsidian
 
 # 2. Register the lifecycle hooks in Claude Code (once per machine)
-python /path/to/claude-obsidian-autopilot/pilot.py install
+python /path/to/claude-autopilot-for-obsidian/pilot.py install
 
 # 3. In EACH project you want documented, run init from the project root:
 cd ~/code/my-project
-python /path/to/claude-obsidian-autopilot/pilot.py init
+python /path/to/claude-autopilot-for-obsidian/pilot.py init
 
 # 4. Verify
-python /path/to/claude-obsidian-autopilot/pilot.py doctor
+python /path/to/claude-autopilot-for-obsidian/pilot.py doctor
 ```
 
 ### What `init` does
 
 Run it from a project root and it scaffolds everything for you:
 
-```mermaid
-flowchart LR
-    Init["python pilot.py init<br/>(run in project root)"] --> V["📁 &lt;project&gt;/obsidian/<br/>vault skeleton:<br/>00-Index, 00-IRON-RULES,<br/>10-Features/, 20-Modules/, …"]
-    Init --> A["📚 ~/Documents/Claude Agent History/<br/>(archives, outside the project)"]
-    Init --> C["⚙️ ~/.claude/obsidian-pilot.config.json<br/>(this project's vault registered)"]
-```
+<p align="center"><img src="docs/init.gif" alt="init fans out to three things — the vault skeleton in project/obsidian, archives in Documents outside the project, and the vault registered in the config" width="90%"></p>
 
 - The **vault lives next to your code** at `<project>/obsidian` — versioned with
   the project, no separate repo to manage.
@@ -213,15 +149,7 @@ vault: one note per **feature** and per **module**, each citing the real
 data-flow, architecture, risk-map and glossary notes — so the vault's graph
 mirrors how the project is actually built.
 
-```mermaid
-flowchart LR
-    Cmd["/obsidian-init"] --> Scan["🔎 Claude reads<br/>the whole codebase"]
-    Scan --> Feat["📝 10-Features/*<br/>one note per feature<br/>(entry point + how it works)"]
-    Scan --> Mod["🧩 20-Modules/*<br/>one note per module"]
-    Feat <-->|"[[wiki-links]]"| Mod
-    Feat --> Idx["🗺️ 00-Index + Architecture<br/>+ Data-Flows + Risk-Map"]
-    Mod --> Idx
-```
+<p align="center"><img src="docs/obsidian-init.gif" alt="obsidian-init — Claude reads the codebase, writes feature notes and module notes wired with wiki-links, then an index, architecture and data-flow notes" width="94%"></p>
 
 Install the command once by copying it where Claude Code looks for commands:
 
@@ -233,9 +161,9 @@ mkdir -p .claude/commands && cp commands/obsidian-init.md .claude/commands/
 ```
 
 To make Claude follow the **semantic** workflow too, expose the skill — either
-symlink/copy the repo into `~/.claude/skills/obsidian-autopilot/`, or install it
-as a plugin. Claude will then load `SKILL.md` automatically when your work
-touches a configured vault.
+symlink/copy the repo into `~/.claude/skills/claude-autopilot-for-obsidian/`, or
+install it as a plugin. Claude will then load `SKILL.md` automatically when your
+work touches a configured vault.
 
 Uninstall cleanly at any time:
 
@@ -281,13 +209,7 @@ One file: `~/.claude/obsidian-pilot.config.json` (or set `OBSIDIAN_PILOT_CONFIG`
 
 ## 🔒 Security model
 
-```mermaid
-flowchart LR
-    T["📝 Conversation<br/>transcript"] --> RD["🧹 Redact secrets<br/>API keys · tokens · private keys"]
-    RD --> MD["📄 Markdown + raw JSONL"]
-    MD --> LOCAL["🏠 Stays LOCAL<br/>(.gitignored by default)"]
-    LOCAL -. "only if archive.push = true" .-> PUSH["☁️ GitHub"]
-```
+<p align="center"><img src="docs/security.gif" alt="Security — transcript is redacted, written to Markdown, stays local; pushing to GitHub is a dashed opt-in path only" width="94%"></p>
 
 - **Archives never leave your machine** unless you set `archive.push: true`.
 - **Secret redaction** masks AWS keys, GitHub/Slack/OpenAI tokens, bearer tokens,
@@ -329,7 +251,7 @@ flowchart LR
 ## 🗂️ Project layout
 
 ```
-claude-obsidian-autopilot/
+claude-autopilot-for-obsidian/
 ├── pilot.py                  # single entry point: hooks + CLI
 ├── SKILL.md                  # the semantic workflow Claude follows
 ├── config.example.json       # config template
@@ -337,8 +259,8 @@ claude-obsidian-autopilot/
 ├── commands/
 │   └── obsidian-init.md      # /obsidian-init slash command (auto-document a codebase)
 ├── docs/
-│   ├── make_demo.py          # renders the animated demo GIF
-│   └── make_hero.py          # renders the hero banner
+│   ├── make_demo.py          # renders the hero demo GIF
+│   └── flowgif.py            # renders the animated flow diagrams
 └── obsidian_pilot/           # pure-stdlib package
     ├── util.py               # paths, logging, locking, atomic writes
     ├── config.py             # discovery, schema, defaults

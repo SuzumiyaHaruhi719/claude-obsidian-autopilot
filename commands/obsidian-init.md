@@ -19,8 +19,8 @@ exhaustive prose.
 ## Phase 0 — Scaffold the vault
 
 Create the vault at `<project-root>/obsidian/`. If `pilot.py` from the
-obsidian-autopilot skill is reachable, run `python <path>/pilot.py init` from the
-project root to scaffold + register it. Otherwise create the structure yourself:
+Claude Autopilot for Obsidian skill is reachable, run `python <path>/pilot.py init`
+from the project root to scaffold + register it. Otherwise create the structure yourself:
 
 ```
 obsidian/

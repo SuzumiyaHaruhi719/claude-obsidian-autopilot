@@ -197,7 +197,7 @@ def render_frame(f: int) -> Image.Image:
 
     # ---- text overlay (title + caption) ----
     td = ImageDraw.Draw(frame)
-    td.text((20 * SS, 16 * SS), "Obsidian Autopilot", font=F_TITLE, fill=(190, 150, 245))
+    td.text((20 * SS, 16 * SS), "Claude Autopilot for Obsidian", font=F_TITLE, fill=(190, 150, 245))
     td.text((20 * SS, 34 * SS), "knowledge graph forming as Claude works",
             font=_font(int(10 * SS)), fill=(120, 120, 150))
     cap = CAPTIONS[0][1]

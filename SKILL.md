@@ -1,5 +1,5 @@
 ---
-name: obsidian-autopilot
+name: claude-autopilot-for-obsidian
 description: >-
   Keep an Obsidian vault as the single source of truth for a codebase while
   Claude works. Use when the user has an Obsidian vault tied to a project and
@@ -10,7 +10,7 @@ description: >-
   conversations, and git-syncing the vault — cross-platform (macOS/Linux/Windows).
 ---
 
-# Obsidian Autopilot
+# Claude Autopilot for Obsidian
 
 A **dynamic, config-driven workflow** for treating an Obsidian vault as the
 single source of truth for a codebase. It replaces hardcoded, OS-specific shell
