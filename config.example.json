@@ -1,0 +1,34 @@
+{
+  "$schema": "see README.md → Configuration for every field",
+
+  "vaults": [
+    {
+      "name": "MyProject",
+      "path": "~/Documents/Obsidian/MyProject/Knowledge",
+      "git_root": "~/Documents/Obsidian/MyProject",
+      "auto_pull": true,
+      "auto_push": false,
+      "pull_keywords": ["obsidian", "vault", "笔记", "知识库", "MyProject"],
+      "push_paths": []
+    }
+  ],
+
+  "archive": {
+    "enabled": true,
+    "dir": "~/Documents/Obsidian/MyProject/Agent History",
+    "push": false,
+    "include_thinking": true,
+    "redact_secrets": true
+  },
+
+  "organize": {
+    "enabled": true,
+    "throttle_seconds": 1800
+  },
+
+  "link_sessions": {
+    "enabled": true
+  },
+
+  "pull_throttle_seconds": 30
+}
