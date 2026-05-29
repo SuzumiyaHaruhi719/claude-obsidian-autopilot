@@ -154,18 +154,36 @@ flowchart TD
 ```bash
 # 1. Clone anywhere
 git clone https://github.com/SuzumiyaHaruhi719/claude-obsidian-autopilot.git
-cd claude-obsidian-autopilot
+cd /path/to/claude-obsidian-autopilot
 
-# 2. Create a starter config and edit it to point at your vault
-python pilot.py init
-#   -> edit ~/.claude/obsidian-pilot.config.json
+# 2. Register the lifecycle hooks in Claude Code (once per machine)
+python /path/to/claude-obsidian-autopilot/pilot.py install
 
-# 3. Register the lifecycle hooks in Claude Code
-python pilot.py install
+# 3. In EACH project you want documented, run init from the project root:
+cd ~/code/my-project
+python /path/to/claude-obsidian-autopilot/pilot.py init
 
 # 4. Verify
-python pilot.py doctor
+python /path/to/claude-obsidian-autopilot/pilot.py doctor
 ```
+
+### What `init` does
+
+Run it from a project root and it scaffolds everything for you:
+
+```mermaid
+flowchart LR
+    Init["python pilot.py init<br/>(run in project root)"] --> V["📁 &lt;project&gt;/obsidian/<br/>vault skeleton:<br/>00-Index, 00-IRON-RULES,<br/>10-Features/, 20-Modules/, …"]
+    Init --> A["📚 ~/Documents/Claude Agent History/<br/>(archives, outside the project)"]
+    Init --> C["⚙️ ~/.claude/obsidian-pilot.config.json<br/>(this project's vault registered)"]
+```
+
+- The **vault lives next to your code** at `<project>/obsidian` — versioned with
+  the project, no separate repo to manage.
+- **Conversation archives default to `~/Documents`**, deliberately *outside* the
+  project so transcripts never pollute (or leak into) your code repo.
+- `init` is **additive and idempotent** — run it in each new project; existing
+  files are never overwritten.
 
 To make Claude follow the **semantic** workflow too, expose the skill — either
 symlink/copy the repo into `~/.claude/skills/obsidian-autopilot/`, or install it
@@ -251,7 +269,7 @@ flowchart LR
 
 | Command | Purpose |
 |---------|---------|
-| `python pilot.py init` | Write a starter config if none exists |
+| `python pilot.py init` | Scaffold `<project>/obsidian`, archive dir in `~/Documents`, register the vault (run in a project root) |
 | `python pilot.py install` | Register the three lifecycle hooks |
 | `python pilot.py uninstall` | Remove this skill's hooks (others untouched) |
 | `python pilot.py status` | Show resolved config + recent sync log |
@@ -276,6 +294,7 @@ claude-obsidian-autopilot/
     ├── archive.py            # transcript -> Markdown + secret redaction
     ├── organize.py           # rebuild Agent-History index
     ├── linker.py             # cross-link related sessions
+    ├── scaffold.py           # init: create the vault skeleton
     └── installer.py          # register/remove hooks in settings.json
 ```
 

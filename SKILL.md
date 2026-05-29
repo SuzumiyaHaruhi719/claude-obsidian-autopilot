@@ -28,7 +28,8 @@ Check `OBSIDIAN_PILOT_CONFIG` or `~/.claude/obsidian-pilot.config.json`. Each
 you are working in matches a configured vault, this workflow is in force.
 
 If there is **no** config, this skill is dormant — do not invent a vault. Offer
-to run `python pilot.py init` if the user wants to set one up.
+to run `python pilot.py init` from the project root: it scaffolds a vault at
+`<project>/obsidian`, points archives at `~/Documents`, and registers the vault.
 
 ## The one rule that matters
 
@@ -84,6 +85,7 @@ unless the user explicitly asks. Your focus is the *content* of knowledge notes.
 ## Helpful commands
 
 ```bash
+python pilot.py init       # scaffold <project>/obsidian + register the vault
 python pilot.py status     # show resolved config + recent sync log
 python pilot.py doctor     # verify git, paths, remotes
 python pilot.py sync       # manual pull+push now

@@ -26,7 +26,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from obsidian_pilot import archive, config, gitsync, installer, linker, organize, util
+from obsidian_pilot import archive, config, gitsync, installer, linker, organize, scaffold, util
 
 
 # --------------------------------------------------------------------------- #
@@ -112,13 +112,57 @@ def cli_doctor(cfg: config.Config) -> None:
 
 
 def cli_init() -> None:
-    dest = config.config_path()
-    if dest.exists():
-        print(f"Config already exists: {dest}")
-        return
-    example = Path(__file__).resolve().parent / "config.example.json"
-    util.write_text(dest, util.read_text(example))
-    print(f"Wrote starter config: {dest}\nEdit it, then run `python pilot.py install`.")
+    """Scaffold a vault in <cwd>/obsidian and register it in the config.
+
+    Run this inside a project. It creates the vault skeleton next to the code,
+    points conversation archives at ~/Documents (kept out of the project), and
+    adds (or updates) this project's entry in the shared config. Additive and
+    idempotent — safe to run once per project.
+    """
+    project_root = Path.cwd()
+    project_name = scaffold.derive_project_name(project_root)
+    vault_dir = project_root / "obsidian"
+    archive_dir = Path.home() / "Documents" / "Claude Agent History"
+
+    created = scaffold.scaffold(vault_dir, project_name)
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    cfg_path = config.config_path()
+    raw = util.read_json(cfg_path, default=None) or {}
+    raw.setdefault("vaults", [])
+
+    already = any(util.expand(v.get("path", "")) == vault_dir.resolve()
+                  for v in raw["vaults"])
+    if not already:
+        raw["vaults"].append({
+            "name": project_name,
+            "path": str(vault_dir),
+            "git_root": str(project_root),
+            "auto_pull": True,
+            "auto_push": False,
+            "pull_keywords": list(config.DEFAULT_PULL_KEYWORDS) + [project_name],
+            "push_paths": [],
+        })
+
+    arch = raw.setdefault("archive", {})
+    arch.setdefault("enabled", True)
+    if not arch.get("dir"):
+        arch["dir"] = str(archive_dir)
+    arch.setdefault("push", False)
+    arch.setdefault("include_thinking", True)
+    arch.setdefault("redact_secrets", True)
+    raw.setdefault("organize", {"enabled": True, "throttle_seconds": 1800})
+    raw.setdefault("link_sessions", {"enabled": True})
+    raw.setdefault("pull_throttle_seconds", 30)
+
+    util.write_json(cfg_path, raw)
+
+    print(f"Project       : {project_name}")
+    print(f"Vault created : {vault_dir}  ({len(created)} new files)"
+          if created else f"Vault         : {vault_dir}  (already populated)")
+    print(f"Agent History : {arch['dir']}  (outside the project)")
+    print(f"Config        : {cfg_path}  ({'added vault' if not already else 'vault already registered'})")
+    print("\nNext: `python pilot.py install`  then start a Claude session here.")
 
 
 def cli_sync(cfg: config.Config) -> None:
